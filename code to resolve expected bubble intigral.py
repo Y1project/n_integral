@@ -36,10 +36,6 @@ def eta_o_eta_N(n):
 def integral(N):
     return (1+2*N)**(3/2) * math.exp(-3*N) * (eta_o_eta_N(N))**3
 
-HM = ()
-
-coeff_int = ((4*sp.pi)/3)*(sp.e(HM))*((a_inf)**3)*(m**3)*(1/(9*sp.sqrt(3)))
-
 #%%
 #Resolve the intigral - as in terms of e-foldings (N) we only concider from 0 to 60
 
@@ -54,7 +50,7 @@ e_exponent = 4*3**0.5/27 * m**3 * a_inf**3 * result_0_60[0]
 
 exponent = sp.log(e_exponent) 
 
-xi_squared = -exponent/(96*sp.pi**2/abs_lambda)
+xi_squared = exponent/(96*sp.pi**2/abs_lambda)
 
 xi = xi_squared**0.5
 
