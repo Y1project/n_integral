@@ -15,6 +15,8 @@ H_o = 1.5*10**(-42)
 m = 1.8*10**13
 bar = 3.46e38
 
+abs_lambda = 0.01
+
 H = 1.1937e8 
 
 eta_o_eta_inf = 3.21/(a_o * H_o)
@@ -42,3 +44,14 @@ def integral(N):
 result_0_60 = sp.integrate.quad(integral, 0, 60)
 
 print(result_0_60[0])
+
+#%%
+#find the xi value, set the expected no. to 1 and take the log for 90pi^2xi^2/lambda
+
+e_exponent = 4*3**0.5/27 * m**3 * a_inf**3 * result_0_60[0]
+
+exponent = sp.log(e_exponent) 
+
+xi_squared = -exponent/(96*sp.pi**2/abs_lambda)
+
+xi = xi_squared**0.5
