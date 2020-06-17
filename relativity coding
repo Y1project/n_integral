@@ -1,0 +1,128 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Jun 15 20:24:50 2020
+
+@author: callumwilliams
+"""
+
+import numpy as np
+import scipy as sp
+
+ 
+c = 3e8
+c_n = 1
+m_pi = 140e6
+m_K = 490e6
+m_mu = 105e6
+m_nu = 500 #units eV/c^2 for all of the masses
+
+m_pi_m = 140
+m_K_m = 490
+m_mu_m = 105
+m_nu_m = 5e-4
+
+m_pi_g = 0.14
+m_K_g = 0.49
+m_mu_g = 0.105
+m_nu_g = 5e-7 #units of GeV/c^2 for all the masses
+
+conv_g = 10e9*(c**2)
+
+#Functions
+
+def E_c(m_a,m_b,m_c): 
+    E_c = (m_a**2+m_b**2-m_c**2)/(2*m_a)
+    return E_c #units eV/c^2
+
+def momentum(E,m):
+    p = (np.sqrt(((E**2 - (m*(c**2))**2))/(c**2)))
+    return p
+
+def three_momentum(p,phi,theta):
+    px = p*np.sin(theta)*np.cos(phi)
+    py = p*np.sin(theta)*np.sin(phi)
+    pz = p*np.cos(theta)
+    return np.array([px,py,pz])
+
+def four_momentum(E,three_momentum):
+    four_momentum = np.array([E, three_momentum[0], three_momentum[1], three_momentum[2]])
+    return four_momentum
+
+def beta(E,m):
+    beta = np.sqrt(1-(m/E)**2)
+    return beta
+
+def boosted_fourmomentum(four_momentum, beta):
+    y = (1-beta**2)**0.5
+    transmatrix = [[y,0,0,-1*y*beta],[0,1,0,0],[0,0,1,0],[-1*y*beta,0,0,y]]
+    boosted_fourmomentum = np.matmul(transmatrix,four_momentum)
+    return boosted_fourmomentum
+
+
+#%%
+print('Section 1')
+
+#%%
+print('Section 1.1')
+
+#%%
+print('Section 1.2')
+    
+Enu_rf_pi_g = E_c(m_pi_g,m_nu_g,m_mu_g)
+print('The neutrino produced in the pion decay is: ',Enu_rf_pi_g,'GeV/c^2')
+
+Enu_rf_K_g = E_c(m_K_g,m_nu_g,m_mu_g)
+print('The neutrino produced in the Kaon decay is: ',Enu_rf_K_g,'GeV/c^2')
+
+#%%
+print('Section 1.3')
+
+momentum_pi = momentum(Enu_rf_pi_g*conv_g,m_pi_g*conv_g)
+print('The momentum of the neutrino from the pion decay is: ',momentum_pi)
+
+momentum_K = momentum(Enu_rf_K_g*c,m_K_g)
+print('The momentum of the neutrino from the K decay is: ',momentum_K)
+
+three_momentum_pi = three_momentum(momentum_pi, (np.pi)/2, (np.pi)/6)
+print('The three momentum of the neutrino from the pion decay is: ',three_momentum_pi)
+
+three_momentum_K = three_momentum(momentum_K, (np.pi)/2, (np.pi)/6)
+print('The three momentum of the neutrino from the K decay is: ',three_momentum_K)
+
+#%%
+print('Section 1.4')
+
+
+#%%
+print('Section 1.5')
+
+#%%
+print('Section 2')
+    
+#%%
+print('Section 2.1')
+
+#%%
+print('Section 2.2')
+
+#%%
+print('Section 2.3')
+    
+beta_pi = beta(1, m_pi_g)*(-1) #when converting from rest from to lab frame, v in the +z direction, so backwards is -z
+print(beta_pi)
+
+beta_K = beta(1, m_K_g)*(-1)
+print(beta_K)
+
+#%%
+print('Section 2.4')
+
+
+
+
+
+
+
+
+
