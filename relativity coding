@@ -8,7 +8,7 @@ Created on Mon Jun 15 20:24:50 2020
 
 import numpy as np
 import scipy as sp
-
+import matplotlib.pyplot as plt
  
 c = 3e8
 c_nat = 1
@@ -25,7 +25,7 @@ m_K_g = 0.49 #GeV
 m_m_g = 0.105 #GeV
 m_n_g = 5e-7 #GeV
 
-
+phi = 0
 #Functions
 
 def E_c(m_a,m_b,m_c): 
@@ -36,7 +36,7 @@ def momentum(E,m):
     p = np.sqrt((E**2 - m**2))
     return p
 
-def three_momentum(p,phi,theta):
+def three_momentum(p,theta,phi): #flipped theta and phi
     px = p*np.sin(theta)*np.cos(phi)
     py = p*np.sin(theta)*np.sin(phi)
     pz = p*np.cos(theta)
@@ -52,9 +52,10 @@ def beta(E,m):
 
 def boosted_fourmomentum(four_momentum, beta):
     y = (1-beta**2)**0.5
-    transmatrix = [[y,0,0,-1*y*beta],[0,1,0,0],[0,0,1,0],[-1*y*beta,0,0,y]]
-    boosted_fourmomentum = np.matmul(transmatrix,four_momentum)
-    return boosted_fourmomentum
+    E=y*four_momentum[0]-y*beta*four_momentum[3]
+    pcz=(-y*beta*four_momentum[0]+y*four_momentum[3])
+    new4mom = [E, four_momentum[1], four_momentum[2], pcz]
+    return new4mom
 
 def find4mtm_c_lf(mA,mB,mC,theta,phi,EA):
     Ec_rf = (mA**2-mB**2+mC**2)/(2*mA)
@@ -62,6 +63,9 @@ def find4mtm_c_lf(mA,mB,mC,theta,phi,EA):
     mtm = [Ec_rf, three_mom[0], three_mom[1], three_mom[2]]
     return mtm
 
+def invariant_test(E,four_momentum):
+    invariant = E**2 - four_momentum[1]**2 - four_momentum[2]**2 - four_momentum[3]**2
+    return invariant 
 
 #%%
 print('Section 1')
@@ -86,10 +90,10 @@ print(p_neutrino_pi_decay)
 p_neutrino_K_decay = (Enu_rf_K_g**2 - m_n_g**2)**0.5
 print(p_neutrino_K_decay)
 
-three_momentum_pi = three_momentum(p_neutrino_pi_decay, (np.pi)/2, (np.pi)/6)
+three_momentum_pi = three_momentum(p_neutrino_pi_decay, (np.pi)/6, 0)
 print('The three momentum of the neutrino from the pion decay is: ',three_momentum_pi)
 
-three_momentum_K = three_momentum(p_neutrino_K_decay, (np.pi)/2, (np.pi)/6)
+three_momentum_K = three_momentum(p_neutrino_K_decay, (np.pi)/6, 0)
 print('The three momentum of the neutrino from the K decay is: ',three_momentum_K)
 
 #%%
@@ -121,10 +125,10 @@ print(beta_K)
 print('Section 2.4')
 
 enu_pion = Enu_rf_pi_g
-enu_kaion = Enu_rf_K_g
+enu_kaon = Enu_rf_K_g
 
 four_mom_n_pi = four_momentum(enu_pion,three_momentum_pi)
-four_mom_n_K = four_momentum(enu_kaion,three_momentum_K)
+four_mom_n_K = four_momentum(enu_kaon,three_momentum_K)
 
 print("In the lab frame the four momentum of both the pion and kaion respectivly are:",four_mom_n_pi,four_mom_n_K)
 
@@ -132,23 +136,26 @@ lt_four_mom_n_pi = boosted_fourmomentum(four_mom_n_pi,beta_pi)
 lt_four_mom_n_K = boosted_fourmomentum(four_mom_n_K,beta_K)
 
 print("The boosted four momentum of both the pion and kaion respectivly are:",lt_four_mom_n_pi,lt_four_mom_n_K)
+#check that thes
+print(invariant_test(Enu_rf_pi_g, lt_four_mom_n_pi))
+print(invariant_test(Enu_rf_pi_g, four_mom_n_pi))
 
 #%%
 print('Section 2.5')
 
-print(find4mtm_c_lf(m_pi_m,m_m_g,m_n_m,(np.pi)/2,(np.pi)/6,1*1000))
+print(find4mtm_c_lf(m_pi_m,m_m_g,m_n_m,(np.pi)/6,(np.pi)/2,1*1000))
 
-four_mom_mu_pi_lf = find4mtm_c_lf(m_pi_m,m_n_m,m_m_m, np.pi/2,np.pi/6,1*1000)
-four_mom_mu_K_lf = find4mtm_c_lf(m_K_m,m_n_m,m_m_m, np.pi/2,np.pi/6,1*1000)
+four_mom_mu_pi_lf = find4mtm_c_lf(m_pi_m,m_n_m,m_m_m, np.pi/6,phi,1*1000)
+four_mom_mu_K_lf = find4mtm_c_lf(m_K_m,m_n_m,m_m_m, np.pi/6,phi,1*1000)
 
-four_mom_n_pi_lf = find4mtm_c_lf(m_pi_m,m_m_m,m_n_m, np.pi/2,np.pi/6,1*1000)
-four_mom_n_K_lf = find4mtm_c_lf(m_K_m,m_m_m,m_n_m, np.pi/2,np.pi/6,1*1000)
+four_mom_n_pi_lf = find4mtm_c_lf(m_pi_m,m_m_m,m_n_m, np.pi/6,phi,1*1000)
+four_mom_n_K_lf = find4mtm_c_lf(m_K_m,m_m_m,m_n_m, np.pi/6,phi,1*1000)
 
 #%%
 print('Section 2.6')
 
-mom_muon_pi_lf = find4mtm_c_lf(m_pi_m,m_n_m,m_m_m, np.pi/2,np.pi/6, 1*1000)
-mom_muon_K_lf = find4mtm_c_lf(m_K_m,m_n_m,m_m_m, np.pi/2,np.pi/6, 1*1000)
+mom_muon_pi_lf = find4mtm_c_lf(m_pi_m,m_n_m,m_m_m, np.pi/6,phi, 1*1000)
+mom_muon_K_lf = find4mtm_c_lf(m_K_m,m_n_m,m_m_m, np.pi/6,phi, 1*1000)
 
 E_mu_pi = E_c(m_pi_g,m_n_g,m_m_g)
 E_mu_K = E_c(m_K_g,m_n_g,m_m_g)
@@ -158,8 +165,8 @@ mom_mu_K = (E_mu_K**2 - m_m_g**2)
 
 #print(mom_mu_pi)
 
-three_mom_mu_pi = three_momentum(mom_mu_pi, sp.pi/2, sp.pi/6)
-three_mom_mu_K = three_momentum(mom_mu_K, sp.pi/2, sp.pi/6)
+three_mom_mu_pi = three_momentum(mom_mu_pi, sp.pi/6, phi)
+three_mom_mu_K = three_momentum(mom_mu_K, sp.pi/6, phi)
 
 #print(three_mom_mu_k)
 
@@ -185,21 +192,17 @@ print('difference between rest frame and lab frame for neutrino in k decay: ',di
 #%%
 print('Section 2.7')
 
-angle_min = np.pi
-angle_max = 0
-phi = sp.pi/6
+mtm_lf_pi_min = find4mtm_c_lf(m_pi_g,m_m_g,m_n_g,np.pi,phi,1)
+Enu_lf_pi_min = mtm_lf_pi_min[0]
 
-Enu_lf_pi_min = ((find4mtm_c_lf(m_pi_g,m_n_g,m_m_g,angle_min,phi,1))[0]) 
-Enu_lf_pi_max = ((find4mtm_c_lf(m_pi_g,m_n_g,m_m_g,angle_max,phi,1))[0])
-
-Enu_lf_K_min = ((find4mtm_c_lf(m_K_g,m_n_g,m_m_g,angle_min,phi,1))[0]) 
-Enu_lf_K_max = ((find4mtm_c_lf(m_K_g,m_n_g,m_m_g,angle_max,phi,1))[0])
+mtm_lf_pi_max = find4mtm_c_lf(m_pi_g,m_m_g,m_n_g,0,phi,1)
+Enu_lf_pi_max = mtm_lf_pi_min[0]
 
 print('the min energy for the product neutrino for the pion decay is: ', Enu_lf_pi_min, 'GeV')
 print('the max energy for the product neutrino for the pion decay is: ', Enu_lf_pi_max, 'GeV')
 
-print('the min energy for the product neutrino for the kaon decay is: ', Enu_lf_K_min, 'GeV')
-print('the max energy for the product neutrino for the kaon decay is: ', Enu_lf_K_max, 'GeV')
+#print('the min energy for the product neutrino for the kaon decay is: ', Enu_lf_K_min, 'GeV')
+#print('the max energy for the product neutrino for the kaon decay is: ', Enu_lf_K_max, 'GeV')
 
 #%%
 print('Section 3')
@@ -207,10 +210,33 @@ print('Section 3')
 #%%
 print('Section 3.1')
 
-print(np.random.rand())
+amplitude = np.pi
 
+random = np.pi*np.random.rand(1000)
 
+plt.plot(random)
+plt.xlabel('index')
+plt.ylabel('Random number')
+plt.show()
 
+## make a histogram of the list
+
+# the function plt.hist() will make a histogram of the argument; you may select the number of bins
+plt.hist(random, bins = 100)
+plt.xlabel('Random number')
+plt.ylabel('N')
+plt.show()
+
+energy_n_lf_pi_arr = []
+
+for i in range(1,1000):
+    energy_n_lf_pi = ((find4mtm_c_lf(m_pi_g,m_n_g,m_m_g,random[i],np.pi/2,1))[0])
+    energy_n_lf_pi_arr.append(energy_n_lf_pi)
+    
+plt.hist(energy_n_lf_pi_arr, bins=100)
+plt.xlabel('Energies')
+plt.ylabel('N')
+plt.plot()
 
 
 
