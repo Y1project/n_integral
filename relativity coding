@@ -11,23 +11,20 @@ import scipy as sp
 
  
 c = 3e8
-c_n = 1
-m_pi = 140e6
-m_K = 490e6
-m_mu = 105e6
-m_nu = 500 #units eV/c^2 for all of the masses
+c_nat = 1
 
-m_pi_m = 140
-m_K_m = 490
-m_mu_m = 105
-m_nu_m = 5e-4
+m_pi_m = 140 #MeV
+m_k_m = 490 #MeV
+m_m_m= 105 #MeV
+m_n = 500 #eV
 
-m_pi_g = 0.14
-m_K_g = 0.49
-m_mu_g = 0.105
-m_nu_g = 5e-7 #units of GeV/c^2 for all the masses
+m_n_m = 5e-4
 
-conv_g = 10e9*(c**2)
+m_pi_g = 0.14 #GeV
+m_k_g = 0.49 #GeV
+m_m_g = 0.105 #GeV
+m_n_g = 5e-7 #GeV
+
 
 #Functions
 
@@ -36,7 +33,7 @@ def E_c(m_a,m_b,m_c):
     return E_c #units eV/c^2
 
 def momentum(E,m):
-    p = (np.sqrt(((E**2 - (m*(c**2))**2))/(c**2)))
+    p = np.sqrt((E**2 - m**2))
     return p
 
 def three_momentum(p,phi,theta):
@@ -69,26 +66,25 @@ print('Section 1.1')
 #%%
 print('Section 1.2')
     
-Enu_rf_pi_g = E_c(m_pi_g,m_nu_g,m_mu_g)
+Enu_rf_pi_g = E_c(m_pi_g,m_n_g,m_m_g)
 print('The neutrino produced in the pion decay is: ',Enu_rf_pi_g,'GeV/c^2')
 
-Enu_rf_K_g = E_c(m_K_g,m_nu_g,m_mu_g)
-print('The neutrino produced in the Kaon decay is: ',Enu_rf_K_g,'GeV/c^2')
+Enu_rf_k_g = E_c(m_k_g,m_n_g,m_m_g)
+print('The neutrino produced in the Kaon decay is: ',Enu_rf_k_g,'GeV/c^2')
 
 #%%
 print('Section 1.3')
 
-momentum_pi = momentum(Enu_rf_pi_g*conv_g,m_pi_g*conv_g)
-print('The momentum of the neutrino from the pion decay is: ',momentum_pi)
+p_neutrino_pi_decay = (Enu_rf_pi_g**2 - m_n_g**2)**0.5
+print(p_neutrino_pi_decay)
+p_neutrino_k_decay = (Enu_rf_k_g**2 - m_n_g**2)**0.5
+print(p_neutrino_k_decay)
 
-momentum_K = momentum(Enu_rf_K_g*c,m_K_g)
-print('The momentum of the neutrino from the K decay is: ',momentum_K)
-
-three_momentum_pi = three_momentum(momentum_pi, (np.pi)/2, (np.pi)/6)
+three_momentum_pi = three_momentum(p_neutrino_pi_decay, (np.pi)/2, (np.pi)/6)
 print('The three momentum of the neutrino from the pion decay is: ',three_momentum_pi)
 
-three_momentum_K = three_momentum(momentum_K, (np.pi)/2, (np.pi)/6)
-print('The three momentum of the neutrino from the K decay is: ',three_momentum_K)
+three_momentum_k = three_momentum(p_neutrino_k_decay, (np.pi)/2, (np.pi)/6)
+print('The three momentum of the neutrino from the K decay is: ',three_momentum_k)
 
 #%%
 print('Section 1.4')
@@ -112,11 +108,68 @@ print('Section 2.3')
 beta_pi = beta(1, m_pi_g)*(-1) #when converting from rest from to lab frame, v in the +z direction, so backwards is -z
 print(beta_pi)
 
-beta_K = beta(1, m_K_g)*(-1)
-print(beta_K)
+beta_k = beta(1, m_k_g)*(-1)
+print(beta_k)
 
 #%%
 print('Section 2.4')
+
+enu_pion = Enu_rf_pi_g
+enu_kaion = Enu_rf_k_g
+
+four_mom_pi = four_momentum(enu_pion,three_momentum_pi)
+four_mom_k = four_momentum(enu_kaion,three_momentum_k)
+
+print("In the lab frame the four momentum of both the pion and kaion respectivly are:",four_mom_pi,four_mom_k)
+
+lt_four_mom_pi = boosted_fourmomentum(four_mom_pi,beta_pi)
+lt_four_mom_k = boosted_fourmomentum(four_mom_k,beta_k)
+
+print("The boosted four momentum of both the pion and kaion respectivly are:",lt_four_mom_pi,lt_four_mom_k)
+
+#%%
+print('Section 2.5')
+
+def find4mtm_c_lf(mA,mB,mC,theta,phi,EA):
+    Ec_rf = (mA**2-mB**2+mC**2)/(2*mA)
+    three_mom = three_momentum((EA**2-mA**2)**0.5,theta,phi)
+    mtm = [Ec_rf, three_mom[0], three_mom[1], three_mom[2]]
+    return mtm
+
+print(find4mtm_c_lf(m_pi_m,m_m_g,m_n_m,(np.pi)/2,(np.pi)/6,1*1000))
+
+four_mom_mu_pi_lf = find4mtm_c_lf(m_pi_m,m_n_g,m_m_m, np.pi/2,np.pi/6,1*1000)
+four_mom_mu_k_lf = find4mtm_c_lf(m_k_m,m_n_g,m_m_m, np.pi/2,np.pi/6,1*1000)
+
+#%%
+print('Section 2.6')
+
+mom_muon_pi_lf = find4mtm_c_lf(m_pi_m,m_n_m,m_m_m, np.pi/2,np.pi/6, 1*1000)
+mom_muon_k_lf = find4mtm_c_lf(m_k_m,m_n_m,m_m_m, np.pi/2,np.pi/6, 1*1000)
+
+E_mu_pi = E_c(m_pi_g,m_n_g,m_m_g)
+E_mu_k = E_c(m_k_g,m_n_g,m_m_g)
+
+mom_mu_pi = (E_mu_pi**2 - m_m_g**2)
+mom_mu_k = (E_mu_k**2 - m_m_g**2)
+
+print(mom_mu_pi)
+
+three_mom_mu_pi = three_momentum(mom_mu_pi, sp.pi/2, sp.pi/6)
+three_mom_mu_k = three_momentum(mom_mu_k, sp.pi/2, sp.pi/6)
+
+print(three_mom_mu_k)
+
+four_mom_mu_pi = four_momentum(E_mu_pi, three_mom_mu_pi)
+four_mom_mu_k = four_momentum(E_mu_k, three_mom_mu_k)
+
+print(four_mom_mu_pi)
+
+#difference = lab frame = rest frame
+
+diff_four_mom_mu_pi = four_mom_mu_pi - four_mom_mu_pi_lf
+print(diff_four_mom_mu_pi) 
+
 
 
 
